@@ -12,6 +12,8 @@ use strict;
 use warnings;
 use utf8;
 use Carp;
+use POSIX "strftime";
+use HTML::Entities;
 
 package Comics;
 
@@ -371,37 +373,41 @@ sub build {
 
 sub preamble {
     my ( $fd ) = @_;
+    my $exp = strftime "%a, %d %b %Y %H:%M:%S GMT", gmtime (time+3600);
     print $fd <<EOD;
-<html>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Comics!</title>
-<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-<style type="text/css">
-body {
-    font-family : Verdana, Arial, Helvetica, sans-serif;
-    text-align: center;
-    margin-top: 0px;
-    margin-right: 0px;
-    margin-bottom: 10px;
-    margin-left: 0px;
-    font-size:12pt;
-}
-.toontable {
-    background-color: #eee;
-    padding: 9px;
-    margin: 18px;
-    border: 1px solid #ddd;
-}
-.toonimage {
-    background-color: white;
-    border: 0px;
-}
-a {
-    text-decoration: none;
-    color: black;
-}
-</style>
-</head>
+  <title>Comics!</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta http-equiv="expires" content="$exp" />
+  <style type="text/css">
+    body {
+      font-family     : "DajaVu Sans", Verdana, Arial, Helvetica, sans-serif;
+      text-align      : center;
+      margin-top      : 0px;
+      margin-right    : 0px;
+      margin-bottom   : 10px;
+      margin-left     : 0px;
+      font-size       : 12pt;
+      }
+    .toontable {
+      background-color: #eee;
+      padding         : 9px;
+      margin          : 18px;
+      border          : 1px solid #ddd;
+      }
+    .toonimage {
+      background-color: white;
+      border          : 0px;
+      }
+    a {
+      text-decoration : none;
+      color: black;
+      }
+    </style>
+  </head>
 <body bgcolor='#ffffff'>
 <a name="top"></a>
 <div align="center">
@@ -418,15 +424,13 @@ EOD
 }
 
 sub htmlstats {
-    my ( $fd ) = @_;
+    my ($fd) = @_;
     print $fd <<EOD;
 <table width="100%" class="toontable" cellpadding="5" cellspacing="0">
-  <tr><td nowrap align="center">
-<p style="margin-left:5px"><a href="http://johan.vromans.org/software/sw_comics.html" target="_blank"><img src="comics.png" width="100" height="100" alt="[Comics]" align="middle"><font size="+4"><bold>Comics</bold></font></a><br>
-<font size="-2">Comics $VERSION, last run: @{[ "".localtime() ]}<br>@{[ statmsg(1) ]}</font><br>
-</p>      </td>
-  </tr>
-</table>
+  <tr><td nowrap="1" align="center"><font size="-2">
+    Comics $VERSION, last run: @{["".localtime()]}<br />@{[statmsg (1)]}<br />
+    </font></td></tr>
+  </table>
 EOD
 }
 
@@ -457,7 +461,7 @@ sub statmsg {
 	    for ( @{ $stats->{fail} } ) {
 		my $t = $_->[1];
 		$t =~ s/ at .*//s;
-		$res .= $_->[0] . " ($t)&#10;";
+		$res .= encode_entities ($_->[0]) . " ($t)&#10;";
 	    }
 	    $res .= "\">$fail fail</span>";
 	}

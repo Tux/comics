@@ -58,6 +58,8 @@ The tag is used to generate file names for images and HTML fragments.
 
 =cut
 
+use HTML::Entities;
+
 sub register {
     my ( $pkg, $init ) = @_;
 
@@ -124,10 +126,14 @@ sub html {
 
     # Alt and title are extracted from HTML, so they should be
     # properly escaped.
-    $res .= qq{alt="} . $state->{c_alt} . qq{" }
-      if $state->{c_alt};
-    $res .= qq{title="} . $state->{c_title} . qq{" }
-      if $state->{c_title};
+    if (my $alt = $state->{c_alt}) {
+	$alt = encode_entities ($alt);
+	$res .= qq{alt="} . $alt . qq{" }
+	}
+    if (my $ttl = $state->{c_title}) {
+	$ttl = encode_entities ($ttl);
+	$res .= qq{title="} . $ttl . qq{" }
+	}
     $res .= qq{width="$w" height="$h" }
       if $w && $h;
 
